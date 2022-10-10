@@ -19,9 +19,96 @@
 //Perlin Noise
 #include "cgra/PerlinNoise.hpp"
 
+//List
+
 using namespace std;
 using namespace cgra;
 using namespace glm;
+
+mesh_builder Application::draw_BasicTerrain() {
+
+	//Coordinates, will be passed around
+	vector<vec3> positionsVec;
+	vector<vec3> normalsVec;
+	vector<vec2> uvsVec;
+	
+	int latDivisions = 15;
+	int lonDivisions = 15;
+
+	//Did a circle for testing atm (borrowed from A1)
+	
+	vector<unsigned int> indices;
+	float radius = 1.0f;
+	auto pi = glm::pi<float>();
+	mesh_builder mb;
+	float x, y, z, xy;                              // vertex position
+	float nx, ny, nz, lengthInv = 1.0f / radius;    // vertex normal
+	float s, t;                                     // vertex texCoord
+	int k1, k2;
+	float latStep = (2 * pi) / latDivisions;
+	float lonStep = pi / lonDivisions;
+	float azimuthAngle, elevationAngle;
+
+	//iterate through all longitude divisions
+	for (int i = 0; i <= lonDivisions; ++i) {
+		elevationAngle = pi / 2 - i * lonStep;
+		xy = radius * cos(elevationAngle);
+		z = radius * sin(elevationAngle);
+		//iterate through all latitude divisions
+		for (int j = 0; j <= latDivisions; ++j) {
+			azimuthAngle = j * latStep;           // starting from 0 to 2pi
+
+			 // vertex position (x, y, z)
+			x = xy * cosf(azimuthAngle);             // r * cos(u) * cos(v)
+			y = xy * sinf(azimuthAngle);             // r * cos(u) * sin(v)
+
+			positionsVec.push_back(vec3(x, y, z));
+
+			// normalized vertex normal (nx, ny, nz)
+			nx = x * lengthInv;
+			ny = y * lengthInv;
+			nz = z * lengthInv;
+
+			normalsVec.push_back(vec3(nx, ny, nz));
+
+			// vertex tex coord (s, t) range between [0, 1]
+			s = (float)j / latDivisions;
+			t = (float)i / lonDivisions;
+
+			uvsVec.push_back(vec2(s, t));
+		}
+	}
+	for (int i = 0; i < lonDivisions; ++i) {
+		k1 = i * (latDivisions + 1);
+		k2 = k1 + latDivisions + 1;
+
+		for (int j = 0; j < latDivisions; ++j, ++k1, ++k2)
+		{
+			//top left triangle
+			if (i != 0) {
+				indices.push_back(k1);
+				indices.push_back(k2);
+				indices.push_back(k1 + 1);
+			}
+			//bottom right triangle
+			if (i != (lonDivisions - 1)) {
+				indices.push_back(k1 + 1);
+				indices.push_back(k2);
+				indices.push_back(k2 + 1);
+			}
+		}
+	}
+	for (unsigned int k = 0; k < indices.size(); ++k) {
+		mb.push_index(k);
+		mb.push_vertex(mesh_vertex{
+			positionsVec[indices[k]],
+			normalsVec[indices[k]],
+			uvsVec[indices[k]]
+			});
+	}
+	return mb;
+	
+}
 
 
 void basic_model::draw(const glm::mat4 &view, const glm::mat4 proj) {
@@ -32,8 +119,8 @@ void basic_model::draw(const glm::mat4 &view, const glm::mat4 proj) {
 	glUniformMatrix4fv(glGetUniformLocation(shader, "uModelViewMatrix"), 1, false, value_ptr(modelview));
 	glUniform3fv(glGetUniformLocation(shader, "uColor"), 1, value_ptr(color));
 
-	drawCylinder();
-	//mesh.draw(); // draw
+	//drawCylinder();
+	mesh.draw(); // draw
 }
 
 
@@ -129,7 +216,8 @@ void Application::renderGUI() {
 		}
 	};
 	if (ImGui::Button("basicTerrain")) {
-		
+		m_model.mesh = draw_BasicTerrain().build();
+		m_model.color = vec3(1, 0, 0);
 	};
 	
 	ImGui::Separator();

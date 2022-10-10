@@ -71,4 +71,7 @@ public:
 	void scrollCallback(double xoffset, double yoffset);
 	void keyCallback(int key, int scancode, int action, int mods);
 	void charCallback(unsigned int c);
+
+	// draw terrain
+	cgra::mesh_builder draw_BasicTerrain();
 };
