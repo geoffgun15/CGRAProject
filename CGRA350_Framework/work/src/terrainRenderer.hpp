@@ -19,7 +19,7 @@
 struct basic_terrain_model {
 	GLuint shader = 0;
 	terrain::gl_mesh mesh;
-	glm::vec3 color{ 0.7 };
+	glm::vec3 color{ 0.4 };
 	glm::mat4 modelTransform{ 1.0 };
 	GLuint grassTexture;
 	GLuint sandTexture;
@@ -39,7 +39,7 @@ struct basic_terrain_model {
 
 // Main terrain renerer class
 //
-class TerrainRenderer {
+class terrainRenderer {
 public:
 	glm::vec2 m_windowsize;
 
@@ -77,7 +77,7 @@ private:
 	float frequencyMultiplier = 2;
 	float amtitudeMultiplier = 0.5;
 
-	int fractalType = 1; //0 = normal terrain (homogeneous),		1 = smooth valleys (heterogeneous),		2 = Hybrid Multifractal
+	int fractalType = 0; //0 = normal terrain (homogeneous),		1 = smooth valleys (heterogeneous),		2 = Hybrid Multifractal (Broken)
 
 	float offset = 0.7;
 	float H = 0.25;
@@ -108,11 +108,11 @@ private:
 
 public:
 	// setup
-	TerrainRenderer();
+	terrainRenderer();
 
 	// disable copy constructors (for safety)
-	TerrainRenderer(const TerrainRenderer&) = delete;
-	TerrainRenderer& operator=(const TerrainRenderer&) = delete;
+	terrainRenderer(const terrainRenderer&) = delete;
+	terrainRenderer& operator=(const terrainRenderer&) = delete;
 
 	// rendering callbacks (every frame)
 	void render(const glm::mat4& view, const glm::mat4& proj, const glm::vec4& clip_plane=glm::vec4(0.0));

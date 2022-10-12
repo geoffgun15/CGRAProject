@@ -48,7 +48,7 @@ void basic_terrain_model::draw(const glm::mat4& view, const glm::mat4 proj, cons
 }
 
 
-TerrainRenderer::TerrainRenderer() {
+terrainRenderer::terrainRenderer() {
 
 	cgra::shader_builder sb;
 	sb.set_shader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//terrain//color_vert.glsl"));
@@ -66,8 +66,7 @@ TerrainRenderer::TerrainRenderer() {
 	sedimentVolume = vector<vector<float>>(m_model.heightMap.size(), vector<float>(m_model.heightMap[0].size(), 0));
 	
 
-	//bind texture
-
+	//Bind Sand Texture
 	unsigned int sandTexture;
 	glGenTextures(1, &sandTexture);
 	glActiveTexture(GL_TEXTURE0 + 3);
@@ -82,7 +81,7 @@ TerrainRenderer::TerrainRenderer() {
 	m_model.sandTexture = sandTexture;
 
 
-
+	//Bind Grass Texture
 	unsigned int grassTexture;
 	glGenTextures(1, &grassTexture);
 	glActiveTexture(GL_TEXTURE0 + 4);
@@ -97,7 +96,7 @@ TerrainRenderer::TerrainRenderer() {
 	m_model.grassTexture = grassTexture;
 
 
-
+	//Bind Stone Texture
 	unsigned int stoneTexture;
 	glGenTextures(1, &stoneTexture);
 	glActiveTexture(GL_TEXTURE0 + 5);
@@ -115,12 +114,10 @@ TerrainRenderer::TerrainRenderer() {
 
 
 
-//--------------------------------------------------------------------------------
-// Rendering
-//--------------------------------------------------------------------------------
+/* Rendering */
 
 
-void TerrainRenderer::render(const glm::mat4& view, const glm::mat4& proj, const vec4& clip_plane) {
+void terrainRenderer::render(const glm::mat4& view, const glm::mat4& proj, const vec4& clip_plane) {
 
 	if (shouldErodeTerrain && currentErodeIteration < totalIterations) {
 
@@ -179,11 +176,11 @@ void TerrainRenderer::render(const glm::mat4& view, const glm::mat4& proj, const
 	m_model.draw(view, proj, clip_plane);
 }
 
-
-void TerrainRenderer::renderGUI() {
+/* GUI */
+void terrainRenderer::renderGUI() {
 
 	//generated a new seed and terrain
-	if (ImGui::Button("New Seed")) {
+	if (ImGui::Button("Randomize Seed")) {
 		shouldErodeTerrain = false;
 		genPermutations();
 		generateTerrain(numOctaves);
@@ -195,7 +192,7 @@ void TerrainRenderer::renderGUI() {
 		ImGui::Indent();
 
 		//chose terrain type
-		if (ImGui::Combo("Terrain Type", &fractalType, "Normal Terrain\0Smooth Valleys\0Hybrid Multifractal\0", 3)) {
+		if (ImGui::Combo("Terrain Type", &fractalType, "Basic \0With Smoothing", 3)) {
 			shouldErodeTerrain = false;
 			generateTerrain(numOctaves);
 		}
@@ -241,14 +238,15 @@ void TerrainRenderer::renderGUI() {
 	if (ImGui::CollapsingHeader("Texture")) {
 		ImGui::Indent();
 
-		ImGui::SliderFloat("blendDist", &m_model.blendDist, 0, 4, "%.2f");
-		ImGui::SliderFloat("transition 1", &m_model.transitionHeight1, -1, 1, "%.2f");
-		ImGui::SliderFloat("transition 2", &m_model.transitionHeight2, -1, 1, "%.2f");
+		ImGui::SliderFloat("Blend Smoothness", &m_model.blendDist, 0, 4, "%.2f");
+		ImGui::SliderFloat("Sand Level", &m_model.transitionHeight1, -1, 1, "%.2f");
+		ImGui::SliderFloat("Fog Level", &m_model.transitionHeight2, -1, 1, "%.2f");
 
 		ImGui::Unindent();
 	}
 
-
+	/*Currently Broken
+	* 
 	//Erosion Options
 	if (ImGui::CollapsingHeader("Erosion")) {
 		ImGui::Indent();
@@ -287,17 +285,13 @@ void TerrainRenderer::renderGUI() {
 
 		ImGui::Unindent();
 	}
-
+	*/
 }
 
 
+/* Perlin Noise Implementation */
 
-//--------------------------------------------------------------------------------
-// Perlin Noise
-//--------------------------------------------------------------------------------
-
-
-float TerrainRenderer::perlinNoise(float x, float y) {
+float terrainRenderer::perlinNoise(float x, float y) {
 
 	//get square corner and point in square coords	
 	int X = (int)fmod(x, 256); //square coords
@@ -345,7 +339,7 @@ float TerrainRenderer::perlinNoise(float x, float y) {
 //dot product with the vector towards the point in the square. Does this by returning a different vector based on the
 //first 4 bits of the hash of the conter.
 //probably not as efficient as Perlin's grad() function but much easier to understand than a bunch of bit flipping.
-vec2 TerrainRenderer::getCornerVector(int corner) {
+vec2 terrainRenderer::getCornerVector(int corner) {
 	int hash = corner % 4;
 	switch (hash) {
 	case 0: return vec2(1.0f, 1.0f); break;
@@ -356,29 +350,26 @@ vec2 TerrainRenderer::getCornerVector(int corner) {
 	}
 }
 
-float TerrainRenderer::fade(float t) {
+float terrainRenderer::fade(float t) {
 	return t * t * t * (t * (t * 6 - 15) + 10);
 }
 
-float TerrainRenderer::lerp(float x, float p1, float p2) {
+float terrainRenderer::lerp(float x, float p1, float p2) {
 	//assert(x >= 0 && x <= 1);
 
 	return p1 + x * (p2 - p1);
 }
 
-void TerrainRenderer::genPermutations() {
+void terrainRenderer::genPermutations() {
 	//shuffle the seed (permutation table)
 	std::shuffle(permutations, permutations + 256, default_random_engine());
 }
 
 
 
-//--------------------------------------------------------------------------------
-// Generate Tererain
-//--------------------------------------------------------------------------------
 
-
-void TerrainRenderer::generateTerrain(int numOctaves) {
+/* Terrain Generation */
+void terrainRenderer::generateTerrain(int numOctaves) {
 	
 	//generate height map
 	//generate extra points along all sides for calculating the normals at the edges
@@ -434,7 +425,7 @@ void TerrainRenderer::generateTerrain(int numOctaves) {
 }
 
 
-mesh_builder TerrainRenderer::generatePlane() {
+mesh_builder terrainRenderer::generatePlane() {
 
 	std::vector<vec3> vertices;
 	std::vector<vec2> positions;
@@ -481,9 +472,9 @@ mesh_builder TerrainRenderer::generatePlane() {
 	return mb;
 }
 
+/* erode */
 
-
-vector<vector<float>> TerrainRenderer::erodeTerrainTerraces(vector<vector<float>> heightMap, int size) {
+vector<vector<float>> terrainRenderer::erodeTerrainTerraces(vector<vector<float>> heightMap, int size) {
 
 	for (int x = 1; x < size - 1; x++) {
 		for (int y = 1; y < size - 1; y++) {
@@ -521,7 +512,7 @@ vector<vector<float>> TerrainRenderer::erodeTerrainTerraces(vector<vector<float>
 }
 
 
-vector<vector<float>> TerrainRenderer::erodeTerrainRealistic(vector<vector<float>> heightMap, int size) {
+vector<vector<float>> terrainRenderer::erodeTerrainRealistic(vector<vector<float>> heightMap, int size) {
 
 	for (int x = 1; x < size - 1; x++) {
 		for (int y = 1; y < size - 1; y++) {
@@ -626,8 +617,9 @@ vector<vector<float>> TerrainRenderer::erodeTerrainRealistic(vector<vector<float
 	return heightMap;
 }
 
+/* FBM */
 
-float TerrainRenderer::homogeneousfbm(float x, float y, int numOctaves) {
+float terrainRenderer::homogeneousfbm(float x, float y, int numOctaves) {
 	float CurrentHeight = 0;
 
 	//add multiple octaves (frequencies that are double the last frequancy and half the amptitude) together to make rough terrain.
@@ -642,7 +634,7 @@ float TerrainRenderer::homogeneousfbm(float x, float y, int numOctaves) {
 	return CurrentHeight;
 }
 
-float TerrainRenderer::heterogeneousfbm(float x, float y, int numOctaves) {
+float terrainRenderer::heterogeneousfbm(float x, float y, int numOctaves) {
 	float CurrentHeight = 0;
 	float weight = 1.0f;
 
@@ -671,7 +663,7 @@ float TerrainRenderer::heterogeneousfbm(float x, float y, int numOctaves) {
 	return CurrentHeight;
 }
 
-float TerrainRenderer::hybridMultifractal(float x, float y, int numOctaves) {
+float terrainRenderer::hybridMultifractal(float x, float y, int numOctaves) {
 	float CurrentHeight = 0;
 	float weight = 1.0f;
 	float previousNoiseVal = 1.0f;

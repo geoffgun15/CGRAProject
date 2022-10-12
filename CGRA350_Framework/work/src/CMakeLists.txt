@@ -7,7 +7,7 @@ list(APPEND sources
 )
 
 # Add executable target and link libraries
-add_executable(${CGRA_PROJECT} ${sources} "TerrainMesh.cpp")
+add_executable(${CGRA_PROJECT} ${sources})
 
 # ----TODO--------------------- #
 # list your subdirectories here #

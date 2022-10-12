@@ -1,3 +1,4 @@
+#define GLM_ENABLE_EXPERIMENTAL
 
 #pragma once
 
@@ -36,9 +37,10 @@ private:
     bool m_showWireframe = false;
 
     // renderers
-    std::shared_ptr<TerrainRenderer> terrain_renderer;
+    std::shared_ptr<terrainRenderer> terrain_renderer;
 
     bool show_terrain = true;
+    bool show_trees = false;
 
 public:
     // setup

@@ -22,7 +22,7 @@ using namespace glm;
 
 Application::Application(GLFWwindow *window) : m_window(window)
 {
-    terrain_renderer = make_shared<TerrainRenderer>();
+    terrain_renderer = make_shared<terrainRenderer>();
 }
 
 void Application::render()
@@ -73,24 +73,31 @@ void Application::renderGUI()
     ImGui::Separator();
 
     // helpful drawing options
-    ImGui::Checkbox("Show axis", &m_show_axis);
-    ImGui::SameLine();
-    ImGui::Checkbox("Show grid", &m_show_grid);
-    ImGui::Checkbox("Wireframe", &m_showWireframe);
-    ImGui::SameLine();
-    if (ImGui::Button("Screenshot"))
-        rgba_image::screenshot(true);
+    //ImGui::Checkbox("Show axis", &m_show_axis);
+    //ImGui::SameLine();
+    //ImGui::Checkbox("Show grid", &m_show_grid);
+    //ImGui::Checkbox("Wireframe", &m_showWireframe);
+    //ImGui::SameLine();
+    //if (ImGui::Button("Screenshot"))
+    //    rgba_image::screenshot(true);
 
-    ImGui::Separator();
+    //ImGui::Separator();
     if (ImGui::Checkbox("Terrain", &show_terrain))
     ImGui::Separator();
+
+    if (ImGui::Checkbox("Trees", &show_trees))
+        ImGui::Separator();
 	
     if (show_terrain){
-        if (ImGui::CollapsingHeader("Terrain##ID1")) {
+        if (ImGui::CollapsingHeader("Options")) {
             ImGui::Indent();
             terrain_renderer->renderGUI();
             ImGui::Unindent();
         }
+    }
+
+    if (show_trees) {
+        
     }
 
     // finish creating window

@@ -17,7 +17,7 @@
 using namespace std;
 using namespace cgra;
 
-//Plane for displaying texture output
+//Plane for displaying output
 float quadVertices[] = {
  -1.0f,  1.0f,  0.0f, 1.0f,
  -1.0f, -1.0f,  0.0f, 0.0f,
