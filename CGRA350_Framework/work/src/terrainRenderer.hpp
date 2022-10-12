@@ -17,6 +17,7 @@
 // Can be copied and modified for adding in extra information for drawing
 // including textures for texture mapping etc.
 struct basic_terrain_model {
+	
 	GLuint shader = 0;
 	terrain::gl_mesh mesh;
 	glm::vec3 color{ 0.4 };
@@ -34,6 +35,7 @@ struct basic_terrain_model {
 	float transitionHeight2 = 0.5f;
 
 	void draw(const glm::mat4& view, const glm::mat4 proj, const glm::vec4 &clip_plane);
+	
 };
 
 
@@ -72,9 +74,9 @@ private:
 	//base terrain
 	float scale = 25;
 	float baseFrequency = 0.04;
-	int numOctaves = 6;
 	float frequencyMultiplier = 2;
 	float amtitudeMultiplier = 0.5;
+	int numOctaves = 6;
 
 	int fractalType = 0; //0 = normal terrain (homogeneous),		1 = smooth valleys (heterogeneous),		2 = Hybrid Multifractal (Broken)
 

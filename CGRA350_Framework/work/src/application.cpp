@@ -62,7 +62,8 @@ void Application::render()
 }
 
 void Application::renderGUI()
-{
+{   
+	
     // setup window
     ImGui::SetNextWindowPos(ImVec2(5, 5), ImGuiSetCond_Once);
     ImGui::SetNextWindowSize(ImVec2(300, 350), ImGuiSetCond_Once);
