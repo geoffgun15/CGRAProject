@@ -124,7 +124,6 @@ void terrainRenderer::render(const glm::mat4& view, const glm::mat4& proj, const
 		if (terrainType == 0) {
 			m_model.heightMap = erodeTerrainTerraces(m_model.heightMap, m_model.heightMap.size());
 		}else {
-			//testHM = erodeTerrainRealistic(testHM, 5, 1, erodeIter < rainIter);
 			m_model.heightMap = erodeTerrainRealistic(m_model.heightMap, m_model.heightMap.size());
 		}
 		currentErodeIteration++;
@@ -355,8 +354,6 @@ float terrainRenderer::fade(float t) {
 }
 
 float terrainRenderer::lerp(float x, float p1, float p2) {
-	//assert(x >= 0 && x <= 1);
-
 	return p1 + x * (p2 - p1);
 }
 

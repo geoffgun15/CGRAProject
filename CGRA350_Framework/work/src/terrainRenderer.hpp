@@ -45,8 +45,6 @@ public:
 
 private:
 
-	std::vector<std::vector<float>> testHM = std::vector<std::vector<float>>();
-
 	// geometry
 	basic_terrain_model m_model;
 	float worldSize = 100;
@@ -54,6 +52,7 @@ private:
 	float mapSize = worldSize / squareSize + 1;
 
 	//noise
+	//Randomised numbers from 0 - 255
 	int permutations[256] = {151,160,137,91,90,15,131,13,201,95,96,53,194,233,7,225,140,36,
 							103,30,69,142,8,99,37,240,21,10,23,190, 6,148,247,120,234,75,0,
 							26,197,62,94,252,219,203,117,35,11,32,57,177,33,88,237,149,56,
@@ -129,7 +128,6 @@ private:
 	//generate terrain	
 	void generateTerrain(int numOctaves);
 	terrain::mesh_builder generatePlane();
-	//terrain::mesh_builder generateMeshFromHeightMap(std::vector<std::vector<float>> heightMap, int size, int numTriangles);
 
 	float homogeneousfbm(float x, float y, int numOctaves);
 	float heterogeneousfbm(float x, float y, int numOctaves);
