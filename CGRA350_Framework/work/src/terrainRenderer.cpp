@@ -244,8 +244,10 @@ void terrainRenderer::renderGUI() {
 		ImGui::Unindent();
 	}
 
-	/*Currently Broken
-	* 
+	/*
+	Currently Broken
+	Erosion
+
 	//Erosion Options
 	if (ImGui::CollapsingHeader("Erosion")) {
 		ImGui::Indent();
@@ -368,7 +370,7 @@ void terrainRenderer::genPermutations() {
 /* Terrain Generation */
 void terrainRenderer::generateTerrain(int numOctaves) {
 	
-	//generate height map
+	//generate height map (we'll use said heightmap to generate the terrain)
 	//generate extra points along all sides for calculating the normals at the edges
 	vector<vector<float>> heightMap(mapSize + 2, vector<float>(mapSize + 2, 0));
 	//float stepSize = size / numTrianglesAcross;
@@ -544,26 +546,18 @@ vector<vector<float>> terrainRenderer::erodeTerrainRealistic(vector<vector<float
 				}
 
 			}
-			
-
-
 
 			
 			//Hydrolic Erosion
-
 			//add water (rain)
 			waterVolume[y][x] += kr;
-			
-
 
 			//erode terrain (disolve sediment into water)
 			float erodeAmount = waterVolume[y][x] * ks;
 			heightMap[y][x] -= erodeAmount;
 			sedimentVolume[y][x] += erodeAmount;
 
-
 			//transport water with sediment in it
-			
 			float totalDiff = 0;
 			for (int i = -1; i <= 1; i++) {
 				for (int j = -1; j <= 1; j++) {
@@ -614,7 +608,7 @@ vector<vector<float>> terrainRenderer::erodeTerrainRealistic(vector<vector<float
 	return heightMap;
 }
 
-/* FBM */
+/* Terrain Generation Fractals */
 
 float terrainRenderer::homogeneousfbm(float x, float y, int numOctaves) {
 	float CurrentHeight = 0;
@@ -631,7 +625,7 @@ float terrainRenderer::homogeneousfbm(float x, float y, int numOctaves) {
 	return CurrentHeight;
 }
 
-float terrainRenderer::heterogeneousfbm(float x, float y, int numOctaves) {
+float terrainRenderer::heterogeneousfbm(float x, float y, int numOctaves) { //FBM with smoothing
 	float CurrentHeight = 0;
 	float weight = 1.0f;
 

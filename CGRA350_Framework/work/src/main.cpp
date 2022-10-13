@@ -17,7 +17,7 @@
 using namespace std;
 using namespace cgra;
 
-//Plane for displaying output
+//QuadVerticies for Outputs
 float quadVertices[] = {
  -1.0f,  1.0f,  0.0f, 1.0f,
  -1.0f, -1.0f,  0.0f, 0.0f,
@@ -148,7 +148,7 @@ int main() {
 	sb.set_shader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//framebuffer_frag.glsl"));
 	GLuint shader = sb.build();
 
-	//Load fog texture into shader
+	//Load Fog Texture
 	GLuint fogTexture = rgba_image(CGRA_SRCDIR + string("/res/textures/fogTexture.png")).uploadTexture();
 	glUseProgram(shader);
 	glUniform1i(glGetUniformLocation(shader, "fogTexture"), 2);
@@ -160,7 +160,7 @@ int main() {
 	glGenFramebuffers(1, &framebuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
-	//Create original output texture
+	//Texture Color Buffer
 	unsigned int textureColorBuffer;
 	glGenTextures(1, &textureColorBuffer);
 	glBindTexture(GL_TEXTURE_2D, textureColorBuffer);
@@ -170,7 +170,7 @@ int main() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	//Create depth buffer texture
+	//Dept Buffer
 	unsigned int depthBuffer;
 	glGenTextures(1, &depthBuffer);
 	glBindTexture(GL_TEXTURE_2D, depthBuffer);
@@ -242,7 +242,8 @@ int main() {
 }
 
 namespace
-{
+{	
+	//Resize Window
     void framebufferResize(GLFWwindow *win, int width, int height)
     {
         application_ptr->resize(width, height);
@@ -252,8 +253,7 @@ namespace
     {
         // if not captured then foward to application
         ImGuiIO &io = ImGui::GetIO();
-        if (io.WantCaptureMouse)
-            return;
+        if (io.WantCaptureMouse) return;
         application_ptr->cursorPosCallback(xpos, ypos);
     }
 
@@ -264,8 +264,7 @@ namespace
 
         // if not captured then foward to application
         ImGuiIO &io = ImGui::GetIO();
-        if (io.WantCaptureMouse)
-            return;
+        if (io.WantCaptureMouse) return;
         application_ptr->mouseButtonCallback(button, action, mods);
     }
 
@@ -276,8 +275,7 @@ namespace
 
         // if not captured then foward to application
         ImGuiIO &io = ImGui::GetIO();
-        if (io.WantCaptureMouse)
-            return;
+        if (io.WantCaptureMouse) return;
         application_ptr->scrollCallback(xoffset, yoffset);
     }
 
@@ -288,8 +286,7 @@ namespace
 
         // if not captured then foward to application
         ImGuiIO &io = ImGui::GetIO();
-        if (io.WantCaptureKeyboard)
-            return;
+        if (io.WantCaptureKeyboard) return;
         application_ptr->keyCallback(key, scancode, action, mods);
     }
 
@@ -300,8 +297,7 @@ namespace
 
         // if not captured then foward to application
         ImGuiIO &io = ImGui::GetIO();
-        if (io.WantTextInput)
-            return;
+        if (io.WantTextInput) return;
         application_ptr->charCallback(c);
     }
 
@@ -371,12 +367,10 @@ namespace
     void APIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei, const GLchar *message, GLvoid *)
     {
         // Don't report notification messages
-        if (severity == GL_DEBUG_SEVERITY_NOTIFICATION)
-            return;
+        if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) return;
 
         // nvidia: avoid debug spam about attribute offsets
-        if (id == 131076)
-            return;
+        if (id == 131076) return;
 
         cerr << "GL [" << getStringForSource(source) << "] " << getStringForType(type) << ' ' << id << " : ";
         cerr << message << " (Severity: " << getStringForSeverity(severity) << ')' << endl;

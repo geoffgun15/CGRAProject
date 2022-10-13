@@ -50,10 +50,10 @@ void Application::render()
     mat4 view = translate(mat4(1), vec3(0, 0, -m_distance)) * rotate(mat4(1), m_pitch, vec3(1, 0, 0)) * rotate(mat4(1), m_yaw, vec3(0, 1, 0));
 
     // helpful draw options
-    if (m_show_grid)
-        drawGrid(view, proj);
-    if (m_show_axis)
-        drawAxis(view, proj);
+    //if (m_show_grid)
+        //drawGrid(view, proj);
+    //if (m_show_axis)
+        //drawAxis(view, proj);
     glPolygonMode(GL_FRONT_AND_BACK, (m_showWireframe) ? GL_LINE : GL_FILL);
 
     // draw

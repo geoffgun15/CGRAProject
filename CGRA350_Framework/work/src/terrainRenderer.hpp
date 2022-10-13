@@ -78,6 +78,7 @@ private:
 	float amtitudeMultiplier = 0.5;
 	int numOctaves = 6;
 
+	// Method for Generating Terrain
 	int fractalType = 0; //0 = normal terrain (homogeneous),		1 = smooth valleys (heterogeneous),		2 = Hybrid Multifractal (Broken)
 
 	float offset = 0.7;
