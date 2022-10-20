@@ -671,7 +671,7 @@ static const stbir_uint32 fp32_to_srgb8_tab4[104] = {
  
 static stbir_uint8 stbir__linear_to_srgb_uchar(float in)
 {
-    static const stbir__FP32 almostone = { 0x3f7fffff }; // 1-eps
+    static const stbir__FP32 almosnow = { 0x3f7fffff }; // 1-eps
     static const stbir__FP32 minval = { (127-13) << 23 };
     stbir_uint32 tab,bias,scale,t;
     stbir__FP32 f;
@@ -681,8 +681,8 @@ static stbir_uint8 stbir__linear_to_srgb_uchar(float in)
     // implementation.
     if (!(in > minval.f)) // written this way to catch NaNs
         in = minval.f;
-    if (in > almostone.f)
-        in = almostone.f;
+    if (in > almosnow.f)
+        in = almosnow.f;
  
     // Do the table lookup and unpack bias, scale
     f.f = in;

@@ -61,9 +61,6 @@ terrainRenderer::terrainRenderer() {
 	m_model.modelTransform = translate(mat4(1), vec3(-worldSize / 2, 0, -worldSize / 2));
 	generateTerrain(numOctaves);
 	m_model.scale = scale;
-
-	waterVolume = vector<vector<float>>(m_model.heightMap.size(), vector<float>(m_model.heightMap[0].size(), 0));
-	sedimentVolume = vector<vector<float>>(m_model.heightMap.size(), vector<float>(m_model.heightMap[0].size(), 0));
 	
 
 	//Bind Sand Texture
@@ -77,7 +74,6 @@ terrainRenderer::terrainRenderer() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	textureImageSand = cgra::rgba_image(CGRA_SRCDIR + std::string("//res//textures//sand_texture.png"));
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, textureImageSand.size.x, textureImageSand.size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureImageSand.data.data());
-
 	m_model.sandTexture = sandTexture;
 
 
@@ -92,83 +88,52 @@ terrainRenderer::terrainRenderer() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	textureImageGrass = cgra::rgba_image(CGRA_SRCDIR + std::string("//res//textures//grass_texture.png"));
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, textureImageGrass.size.x, textureImageGrass.size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureImageGrass.data.data());
-
 	m_model.grassTexture = grassTexture;
 
-
-	//Bind Stone Texture
-	unsigned int stoneTexture;
-	glGenTextures(1, &stoneTexture);
+	//Bind Snow Texture
+	unsigned int snowTexture;
+	glGenTextures(1, &snowTexture);
 	glActiveTexture(GL_TEXTURE0 + 5);
-	glBindTexture(GL_TEXTURE_2D, stoneTexture);
+	glBindTexture(GL_TEXTURE_2D, snowTexture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	textureImageStone = cgra::rgba_image(CGRA_SRCDIR + std::string("//res//textures//stone_texture.png"));
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, textureImageStone.size.x, textureImageStone.size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureImageStone.data.data());
-
-	m_model.stoneTexture = stoneTexture;
+	textureImagesnow = cgra::rgba_image(CGRA_SRCDIR + std::string("//res//textures//snow_texture.png"));
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, textureImagesnow.size.x, textureImagesnow.size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureImagesnow.data.data());
+	m_model.snowTexture = snowTexture;
 
 }
 
-
-
 /* Rendering */
-
-
 void terrainRenderer::render(const glm::mat4& view, const glm::mat4& proj, const vec4& clip_plane) {
-
-	if (shouldErodeTerrain && currentErodeIteration < totalIterations) {
-
-		if (terrainType == 0) {
-			m_model.heightMap = erodeTerrainTerraces(m_model.heightMap, m_model.heightMap.size());
-		}else {
-			m_model.heightMap = erodeTerrainRealistic(m_model.heightMap, m_model.heightMap.size());
-		}
-		currentErodeIteration++;
-
 		
-		//generate mesh
-		mesh_builder plane_mb = generatePlane();
+	//generate mesh
+	mesh_builder plane_mb = generatePlane();
 
-		for (int y = 1; y < m_model.heightMap.size() - 1; y++) {
-			for (int x = 1; x < m_model.heightMap.size() - 1; x++) {
-				int i = (y - 1) * mapSize + (x - 1);
+	for (int y = 1; y < m_model.heightMap.size() - 1; y++) {
+		for (int x = 1; x < m_model.heightMap.size() - 1; x++) {
+			int i = (y - 1) * mapSize + (x - 1);
 
-				plane_mb.vertices[i].pos.y = m_model.heightMap[y][x];
-
-				plane_mb.vertices[i].waterVolume = waterVolume[y][x];
-
-				//calc normal
-				float normX = m_model.heightMap[y][x - 1] / scale - m_model.heightMap[y][x + 1] / scale; //difference in height of previous vertex and next vertex along the x axis
-				float normZ = m_model.heightMap[y - 1][x] / scale - m_model.heightMap[y + 1][x] / scale; //difference in height of previous vertex and next vertex along the z axis	
-				plane_mb.vertices[i].norm = normalize(vec3(normX, 2, normZ));
-			}
+			plane_mb.vertices[i].pos.y = m_model.heightMap[y][x];
+			
+			//calc normal
+			float normX = m_model.heightMap[y][x - 1] / scale - m_model.heightMap[y][x + 1] / scale;
+			float normZ = m_model.heightMap[y - 1][x] / scale - m_model.heightMap[y + 1][x] / scale;
+			plane_mb.vertices[i].norm = normalize(vec3(normX, 2, normZ));
 		}
-
-		
-		//generate texture transition offsets
-		for (int y = 0; y <= worldSize / squareSize; y++) {
-			for (int x = 0; x <= worldSize / squareSize; x++) {
-				int i = y * (worldSize / squareSize + 1) + x;
-				plane_mb.vertices[i].offset = homogeneousfbm(x * 1, y * 1, 5);
-			}
-		}
-
-		m_model.mesh = plane_mb.build();
-
-
-		if (currentErodeIteration % 5 == 0 ) { //every 10th iteration
-		}
-
-		if (currentErodeIteration == totalIterations - 1) {
-			waterVolume = vector<vector<float>>(m_model.heightMap.size(), vector<float>(m_model.heightMap[0].size(), 0));
-			sedimentVolume = vector<vector<float>>(m_model.heightMap.size(), vector<float>(m_model.heightMap[0].size(), 0));
-		}
-		
 	}
-	
+
+		
+	//generate texture transition offsets
+	for (int y = 0; y <= worldSize / squareSize; y++) {
+		for (int x = 0; x <= worldSize / squareSize; x++) {
+			int i = y * (worldSize / squareSize + 1) + x;
+			plane_mb.vertices[i].offset = homogeneousfbm(x * 1, y * 1, 5);
+		}
+	}
+
+	m_model.mesh = plane_mb.build();
 
 	// draw the model
 	m_model.scale = scale;
@@ -180,7 +145,6 @@ void terrainRenderer::renderGUI() {
 
 	//generated a new seed and terrain
 	if (ImGui::Button("Randomize Seed")) {
-		shouldErodeTerrain = false;
 		genPermutations();
 		generateTerrain(numOctaves);
         
@@ -191,13 +155,12 @@ void terrainRenderer::renderGUI() {
 		ImGui::Indent();
 
 		//chose terrain type
-		if (ImGui::Combo("Terrain Type", &fractalType, "Basic \0With Smoothing", 3)) {
-			shouldErodeTerrain = false;
+		if (ImGui::Combo("Terrain Type", &fractalType, "Basic (really basic) \0With Smoothing (better for taller) \0HMF (lower base frequency and freq multiplier) \0fullRandom (really ugly)", 4)) {
 			generateTerrain(numOctaves);
 		}
 
 		//terrain options 
-		if (ImGui::SliderFloat("Scale", &scale, 1, 100, "%.0f", 1.0f)) {
+		if (ImGui::SliderFloat("Scale", &scale, 1, 35, "%.0f", 1.0f)) {
 			generateTerrain(numOctaves);
 		}
 
@@ -205,11 +168,11 @@ void terrainRenderer::renderGUI() {
 			generateTerrain(numOctaves);
 		}
 
-		if (ImGui::SliderFloat("Frequency Multiplier", &frequencyMultiplier, 1, 5, "%.1f")) {
+		if (ImGui::SliderFloat("Frequency Multiplier", &frequencyMultiplier, 1, 3, "%.1f")) {
 			generateTerrain(numOctaves);
 		}
 
-		if (ImGui::SliderFloat("Amptitude Multiplier", &amtitudeMultiplier, 0, 1, "%.2f")) {
+		if (ImGui::SliderFloat("Amptitude Multiplier", &amtitudeMultiplier, 0, 0.5, "%.2f")) {
 			generateTerrain(numOctaves);
 		}
 
@@ -232,7 +195,6 @@ void terrainRenderer::renderGUI() {
 
 	}
 
-
 	//Texture Options
 	if (ImGui::CollapsingHeader("Texture")) {
 		ImGui::Indent();
@@ -243,50 +205,6 @@ void terrainRenderer::renderGUI() {
 
 		ImGui::Unindent();
 	}
-
-	/*
-	Currently Broken
-	Erosion
-
-	//Erosion Options
-	if (ImGui::CollapsingHeader("Erosion")) {
-		ImGui::Indent();
-
-		if (ImGui::Button("Erode Terrain")) {
-			shouldErodeTerrain = !shouldErodeTerrain;
-			generateTerrain(numOctaves);
-			currentErodeIteration = 0;
-		}
-
-		ImGui::SameLine();
-
-		ImGui::Text("iter = %d", currentErodeIteration);
-
-		ImGui::Combo("Erosion Type", &terrainType, "Terraces\0Realistic\0", 2);
-
-		ImGui::Separator();
-		ImGui::Text("Iterations:");
-		ImGui::InputFloat("Num iterations", &totalIterations);
-
-
-		ImGui::Separator();
-		ImGui::Text("Thermal Erosion:");
-		if (ImGui::SliderFloat("Talus Threshold", &talusThreshold, 0, 2, "%.2f")) {
-			generateTerrain(numOctaves);
-		}
-		ImGui::InputFloat("Erosion sediment volume", &sedimentvolume);
-
-
-		ImGui::Separator();
-		ImGui::Text("Hydrolic Erosion:");
-		ImGui::InputFloat("rain", &kr);
-		ImGui::InputFloat("desolve", &ks);
-		ImGui::InputFloat("Evaporation", &ke);
-		ImGui::InputFloat("Capacity", &kc);
-
-		ImGui::Unindent();
-	}
-	*/
 }
 
 
@@ -339,7 +257,6 @@ float terrainRenderer::perlinNoise(float x, float y) {
 //Gets the constant vector at a corner given its hash from the permutations table which can then be used to get the
 //dot product with the vector towards the point in the square. Does this by returning a different vector based on the
 //first 4 bits of the hash of the conter.
-//probably not as efficient as Perlin's grad() function but much easier to understand than a bunch of bit flipping.
 vec2 terrainRenderer::getCornerVector(int corner) {
 	int hash = corner % 4;
 	switch (hash) {
@@ -364,16 +281,11 @@ void terrainRenderer::genPermutations() {
 	std::shuffle(permutations, permutations + 256, default_random_engine());
 }
 
-
-
-
 /* Terrain Generation */
 void terrainRenderer::generateTerrain(int numOctaves) {
 	
-	//generate height map (we'll use said heightmap to generate the terrain)
-	//generate extra points along all sides for calculating the normals at the edges
+	//generate height map
 	vector<vector<float>> heightMap(mapSize + 2, vector<float>(mapSize + 2, 0));
-	//float stepSize = size / numTrianglesAcross;
 	for (int y = 0; y < mapSize + 2; y++) {
 		for (int x = 0; x < mapSize + 2; x++) {
 			if (fractalType == 0) {
@@ -382,18 +294,16 @@ void terrainRenderer::generateTerrain(int numOctaves) {
 			else if (fractalType == 1) {
 				heightMap[y][x] = (heterogeneousfbm(x * squareSize, y * squareSize, numOctaves) - 0.5f) * scale;
 			}
-			else {
+			else if (fractalType == 2) {
 				heightMap[y][x] = (hybridMultifractal(x * squareSize, y * squareSize, numOctaves) - 0.5f) * scale;
+			}
+			else if (fractalType == 3) {
+				heightMap[y][x] = fullrandom(x * squareSize, y * squareSize, numOctaves) * scale;
 			}
 		}
 	}
 	m_model.heightMap = heightMap;
-	
 
-	waterVolume = vector<vector<float>>(heightMap.size(), vector<float>(heightMap[0].size(), 0));
-	sedimentVolume = vector<vector<float>>(heightMap.size(), vector<float>(heightMap[0].size(), 0));
-
-	
 	//generate mesh
 	mesh_builder plane_mb = generatePlane();
 
@@ -423,14 +333,11 @@ void terrainRenderer::generateTerrain(int numOctaves) {
 
 }
 
-
 mesh_builder terrainRenderer::generatePlane() {
 
 	std::vector<vec3> vertices;
 	std::vector<vec2> positions;
 	std::vector<int> indices;
-
-	//float stepSize = size / numTrianglesAcross;
 
 	for (int y = 0; y < mapSize; y++) {
 		for (int x = 0; x < mapSize; x++) {
@@ -453,15 +360,14 @@ mesh_builder terrainRenderer::generatePlane() {
 		}
 	}
 
-	//make mesh
 	mesh_builder mb;
 
 	for (int i = 0; i < vertices.size(); i++) {
 		mb.push_vertex(mesh_vertex{
-						vertices[i], //point coordinates
-						vec3(0,1,0), //normal
+						vertices[i],
+						vec3(0,1,0),
 						positions[i],
-						0.0f}); //uv
+						0.0f});
 	}
 
 	for (int i = 0; i < indices.size(); i++) {
@@ -471,144 +377,21 @@ mesh_builder terrainRenderer::generatePlane() {
 	return mb;
 }
 
-/* erode */
-
-vector<vector<float>> terrainRenderer::erodeTerrainTerraces(vector<vector<float>> heightMap, int size) {
-
-	for (int x = 1; x < size - 1; x++) {
-		for (int y = 1; y < size - 1; y++) {
-
-			//get neightbor with steapest slope
-			float dmax = 0;
-			vec2 neigh = vec2(0, 0);
-			for (int i = -1; i <= 1; i++) {
-				for (int j = -1; j <= 1; j++) {
-
-					float d = heightMap[y][x] - heightMap[y + j][x + i];
-					if (d > dmax) {
-						dmax = d;
-						neigh = vec2(x + i, y + j);
-					}
-
-				}
-			}
-
-			//erode point (move material down the slope)
-			if (dmax > 0 && dmax <= talusThreshold) {
-				vec2 b = vec2(heightMap[y][x], heightMap[neigh.y][neigh.x]);
-
-				float deltaH = 0.3 * dmax;
-				heightMap[y][x] -= deltaH;
-				heightMap[neigh.y][neigh.x] += deltaH;
-
-			}
-
-		}
-	}
-
-
-	return heightMap;
-}
-
-
-vector<vector<float>> terrainRenderer::erodeTerrainRealistic(vector<vector<float>> heightMap, int size) {
-
-	for (int x = 1; x < size - 1; x++) {
-		for (int y = 1; y < size - 1; y++) {
-			
-			//Thermal Erosion
-			if (currentErodeIteration % 1 == 0) {
-
-				float totalDiff = 0;
-				float diffMax = 0;
-				for (int i = -1; i <= 1; i++) {
-					for (int j = -1; j <= 1; j++) {
-						float diff = heightMap[y][x] - heightMap[y + j][x + i];
-						if (diff > diffMax) {
-							diffMax = diff;
-						}
-						if(diff > talusThreshold)
-							totalDiff += diff;
-					}
-				}
-				if (totalDiff > 0) {
-					float initialHeight = heightMap[y][x];
-					for (int i = -1; i <= 1; i++) {
-						for (int j = -1; j <= 1; j++) {
-							float diff = initialHeight - heightMap[y + j][x + i];
-							if (diff > talusThreshold) {
-								float moveAmount = sedimentvolume*(diffMax - talusThreshold)*(diff/totalDiff);
-								heightMap[y][x] -= moveAmount;
-								heightMap[y + j][x + i] += moveAmount;
-							}
-						}
-					}
-				}
-
-			}
-
-			
-			//Hydrolic Erosion
-			//add water (rain)
-			waterVolume[y][x] += kr;
-
-			//erode terrain (disolve sediment into water)
-			float erodeAmount = waterVolume[y][x] * ks;
-			heightMap[y][x] -= erodeAmount;
-			sedimentVolume[y][x] += erodeAmount;
-
-			//transport water with sediment in it
-			float totalDiff = 0;
-			for (int i = -1; i <= 1; i++) {
-				for (int j = -1; j <= 1; j++) {
-					float diff = fmax(0.0f, (heightMap[y][x] + waterVolume[y][x]) - (heightMap[y + j][x + i] + waterVolume[y + j][x + i]));
-					totalDiff += diff;
-				}
-			}
-			if (totalDiff > 0) {
-				float totalWaterMoveAmount = fmax(0.0f, fmin(waterVolume[y][x], totalDiff / 2.0f));
-				float initialWaterVolume = waterVolume[y][x];
-				float initialsedimentVolume = sedimentVolume[y][x];
-				for (int i = -1; i <= 1; i++) {
-					for (int j = -1; j <= 1; j++) {
-						float diff = fmax(0.0f, (heightMap[y][x] + initialWaterVolume) - (heightMap[y + j][x + i] + waterVolume[y + j][x + i]));
-						float waterMoveAmount = (diff / totalDiff) * totalWaterMoveAmount;
-						float moveSedimentAmount = (waterMoveAmount / initialWaterVolume) * initialsedimentVolume;
-						waterVolume[y][x] -= waterMoveAmount;
-						sedimentVolume[y][x] -= moveSedimentAmount;
-						waterVolume[y + j][x + i] += waterMoveAmount;
-						sedimentVolume[y + j][x + i] += moveSedimentAmount;
-
-						if (waterVolume[y][x] < 0) waterVolume[y][x] = 0;
-						if (sedimentVolume[y][x] < 0) sedimentVolume[y][x] = 0;
-					}
-				}
-			}
-			
-				
-				
-			//evaporte water
-			waterVolume[y][x] *= 1 - ke;
-			if (waterVolume[y][x] < 0.0001) {
-				waterVolume[y][x] = 0;
-			}
-
-				
-			//deposit sediment
-			float maxSediment = waterVolume[y][x] * kc;
-			float depositAmount = fmax(0.0f, sedimentVolume[y][x] - maxSediment);
-			sedimentVolume[y][x] -= depositAmount;
-			heightMap[y][x] += depositAmount;
-			
-		}
-		
-	}
-
-
-	return heightMap;
-}
-
 /* Terrain Generation Fractals */
+
+float terrainRenderer::fullrandom(float x, float y, int numOctaves) {
+	float CurrentHeight = 0;
+
+	//add multiple octaves (frequencies that are double the last frequancy and half the amptitude) together to make rough terrain.
+	for (int i = 0; i < numOctaves; i++) {
+		float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		CurrentHeight += r;
+
+	}
+
+	return CurrentHeight;
+}
+
 
 float terrainRenderer::homogeneousfbm(float x, float y, int numOctaves) {
 	float CurrentHeight = 0;

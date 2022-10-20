@@ -34,7 +34,7 @@ namespace terrain {
 		void destroy();
 	};
 
-
+	//Anne gets these
 	struct mesh_vertex {
 		glm::vec3 pos{0};
 		glm::vec3 norm{0};

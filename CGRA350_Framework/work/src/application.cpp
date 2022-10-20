@@ -86,7 +86,7 @@ void Application::renderGUI()
     if (ImGui::Checkbox("Terrain", &show_terrain))
     ImGui::Separator();
 
-    if (ImGui::Checkbox("Trees", &show_trees))
+    if (ImGui::Checkbox("Trees (Canceled)", &show_trees))
         ImGui::Separator();
 	
     if (show_terrain){

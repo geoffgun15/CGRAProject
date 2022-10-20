@@ -24,15 +24,15 @@ struct basic_terrain_model {
 	glm::mat4 modelTransform{ 1.0 };
 	GLuint grassTexture;
 	GLuint sandTexture;
-	GLuint stoneTexture;
+	GLuint snowTexture;
 	float scale = 20;
 	GLuint offsetBuffer = 0;
 	std::vector<float> offsets = std::vector<float>();
 	std::vector<std::vector<float>> heightMap;
 
 	float blendDist = 2.0f;
-	float transitionHeight1 = 0.0f;
-	float transitionHeight2 = 0.5f;
+	float transitionHeight1 = -1.0f;
+	float transitionHeight2 = 1.0f;
 
 	void draw(const glm::mat4& view, const glm::mat4 proj, const glm::vec4 &clip_plane);
 	
@@ -73,21 +73,18 @@ private:
 
 	//base terrain
 	float scale = 25;
-	float baseFrequency = 0.04;
-	float frequencyMultiplier = 2;
-	float amtitudeMultiplier = 0.5;
-	int numOctaves = 6;
+	float baseFrequency = 0.1;
+	float frequencyMultiplier = 1;
+	float amtitudeMultiplier = 0.2;
+	int numOctaves = 4;
 
 	// Method for Generating Terrain
-	int fractalType = 0; //0 = normal terrain (homogeneous),		1 = smooth valleys (heterogeneous),		2 = Hybrid Multifractal (Broken)
+	int fractalType = 0; //0 = normal terrain (homogeneous),		1 = smooth (heterogeneous),		2 = Hybrid Multifractal (Broken)
 
 	float offset = 0.7;
 	float H = 0.25;
 
-	//errosion
-	int currentErodeIteration = 0;
-	bool shouldErodeTerrain = false;
-	int terrainType = 1; //0 = terraces,	1 = realistic	
+	int terrainType = 1;
 
 	float talusThreshold = 1.0f;
 	float sedimentvolume = 0.05;
@@ -99,13 +96,10 @@ private:
 	float ke = 0.5;
 	float kc = 0.1;
 
-	std::vector<std::vector<float>> waterVolume = std::vector<std::vector<float>>();
-	std::vector<std::vector<float>> sedimentVolume = std::vector<std::vector<float>>();
-
 	//textures
 	cgra::rgba_image textureImageGrass;
 	cgra::rgba_image textureImageSand;
-	cgra::rgba_image textureImageStone;
+	cgra::rgba_image textureImagesnow;
 
 
 public:
@@ -132,11 +126,9 @@ private:
 	void generateTerrain(int numOctaves);
 	terrain::mesh_builder generatePlane();
 
+	float fullrandom(float x, float y, int numOctaves);
 	float homogeneousfbm(float x, float y, int numOctaves);
 	float heterogeneousfbm(float x, float y, int numOctaves);
 	float hybridMultifractal(float x, float y, int numOctaves);
-
-	std::vector<std::vector<float>> erodeTerrainTerraces(std::vector<std::vector<float>> heightMap, int size);
-	std::vector<std::vector<float>> erodeTerrainRealistic(std::vector<std::vector<float>> heightMap, int size);
 
 };
