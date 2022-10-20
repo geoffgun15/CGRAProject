@@ -26,9 +26,12 @@ private:
     float m_pitch = .35;
     float m_yaw = 0;
     float m_distance = 85.46;
+    glm::vec2 m_cam_pos;
 
     // last input
     bool m_leftMouseDown = false;
+    bool m_rightMouseDown = false;
+    bool m_middleMouseDown = false;
     glm::vec2 m_mousePosition;
 
     // drawing flags

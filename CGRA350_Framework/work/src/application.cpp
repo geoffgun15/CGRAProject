@@ -23,6 +23,7 @@ using namespace glm;
 Application::Application(GLFWwindow *window) : m_window(window)
 {
     terrain_renderer = make_shared<terrainRenderer>();
+    m_cam_pos = vec2(0, 0);
 }
 
 void Application::render()
@@ -105,22 +106,34 @@ void Application::renderGUI()
     ImGui::End();
 }
 
-void Application::cursorPosCallback(double xpos, double ypos)
-{
+void Application::cursorPosCallback(double xpos, double ypos){
+    vec2 whsize = m_windowsize / 2.0f;
+
+    double y0 = glm::clamp((m_mousePosition.y - whsize.y) / whsize.y, -1.0f, 1.0f);
+    double y = glm::clamp((float(ypos) - whsize.y) / whsize.y, -1.0f, 1.0f);
+    double dy = -(y - y0);
+
+    double x0 = glm::clamp((m_mousePosition.x - whsize.x) / whsize.x, -1.0f, 1.0f);
+    double x = glm::clamp((float(xpos) - whsize.x) / whsize.x, -1.0f, 1.0f);
+    double dx = x - x0;
     if (m_leftMouseDown)
     {
         vec2 whsize = m_windowsize / 2.0f;
 
         // clamp the pitch to [-pi/2, pi/2]
-        m_pitch += float(acos(glm::clamp((m_mousePosition.y - whsize.y) / whsize.y, -1.0f, 1.0f)) - acos(glm::clamp((float(ypos) - whsize.y) / whsize.y, -1.0f, 1.0f)));
+        m_pitch += float(acos(y0) - acos(y));
         m_pitch = float(glm::clamp(m_pitch, -pi<float>() / 2, pi<float>() / 2));
 
         // wrap the yaw to [-pi, pi]
-        m_yaw += float(acos(glm::clamp((m_mousePosition.x - whsize.x) / whsize.x, -1.0f, 1.0f)) - acos(glm::clamp((float(xpos) - whsize.x) / whsize.x, -1.0f, 1.0f)));
+        m_yaw += float(acos(x0) - acos(x));
         if (m_yaw > pi<float>())
             m_yaw -= float(2 * pi<float>());
         else if (m_yaw < -pi<float>())
             m_yaw += float(2 * pi<float>());
+    } else if (m_rightMouseDown) {
+        m_distance += dy * 10;
+    } else if (m_middleMouseDown) {
+        m_cam_pos += vec2(dx, dy) * 10.f;
     }
 
     // updated mouse position
@@ -136,22 +149,20 @@ void Application::mouseButtonCallback(int button, int action, int mods)
         m_leftMouseDown = (action == GLFW_PRESS); // only other option is GLFW_RELEASE
 }
 
-void Application::scrollCallback(double xoffset, double yoffset)
-{
+void Application::scrollCallback(double xoffset, double yoffset) {
     (void)xoffset; // currently un-used
     m_distance *= pow(1.1f, -yoffset);
 }
 
-void Application::keyCallback(int key, int scancode, int action, int mods)
-{
+
+void Application::keyCallback(int key, int scancode, int action, int mods) {
     (void)key, (void)scancode, (void)action, (void)mods; // currently un-used
 }
 
-void Application::charCallback(unsigned int c)
-{
+
+void Application::charCallback(unsigned int c) {
     (void)c; // currently un-used
 }
-
 void Application::resize(int width, int height)
 {
 	
