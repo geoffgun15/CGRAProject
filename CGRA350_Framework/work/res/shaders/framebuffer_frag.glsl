@@ -13,8 +13,8 @@ uniform float near;
 uniform float far;
 uniform float state;
 
-uniform float amplitude;//How high and low the depth values get
-uniform float period;//Period between wave points being the same value
+uniform float amplitude;
+uniform float period;
 
 uniform float waveOffset;
 uniform float textureSpeed;

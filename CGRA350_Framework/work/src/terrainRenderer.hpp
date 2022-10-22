@@ -79,11 +79,12 @@ private:
 	int numOctaves = 4;
 
 	// Method for Generating Terrain
-	int fractalType = 0; //0 = normal terrain (homogeneous),		1 = smooth (heterogeneous),		2 = Hybrid Multifractal (Broken)
+	//0 = normal terrain (homogeneous),		1 = smooth (heterogeneous),		2 = Hybrid Multifractal
+	int fractalType = 0; 
 
 	float offset = 0.7;
 	float H = 0.25;
-
+	
 	int terrainType = 1;
 
 	float talusThreshold = 1.0f;

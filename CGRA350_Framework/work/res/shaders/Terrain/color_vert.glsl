@@ -38,7 +38,6 @@ void main() {
 	v_out.textureCoord = aTexCoord;
 	int i = 201 * int(aTexCoord.y) + int(aTexCoord.x);
 	v_out.transitionOffset = atransitionOffset * 0.3f;
-	v_out.waterVolume = aWaterVolume;
 
 	// set the screenspace position (needed for converting to fragment data)
 	gl_Position = uProjectionMatrix * uModelViewMatrix * vec4(aPosition, 1);

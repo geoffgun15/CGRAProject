@@ -107,7 +107,7 @@ terrainRenderer::terrainRenderer() {
 
 /* Rendering */
 void terrainRenderer::render(const glm::mat4& view, const glm::mat4& proj, const vec4& clip_plane) {
-		
+	
 	//generate mesh
 	mesh_builder plane_mb = generatePlane();
 
@@ -148,6 +148,14 @@ void terrainRenderer::renderGUI() {
 		genPermutations();
 		generateTerrain(numOctaves);
         
+	}
+
+	//Full Random Button
+	if (ImGui::Button("Full Randomize")) {
+		genPermutations();
+		fractalType = 3;
+		generateTerrain(numOctaves);
+
 	}
 
 	//Base Terrain Options
@@ -377,7 +385,7 @@ mesh_builder terrainRenderer::generatePlane() {
 	return mb;
 }
 
-/* Terrain Generation Fractals */
+/* Terrain Generation Methods */
 
 float terrainRenderer::fullrandom(float x, float y, int numOctaves) {
 	float CurrentHeight = 0;
@@ -418,12 +426,12 @@ float terrainRenderer::heterogeneousfbm(float x, float y, int numOctaves) { //FB
 		float noise = perlinNoise(x*baseFrequency*pow(frequencyMultiplier,i), y*baseFrequency*pow(frequencyMultiplier,i));
 
 		//move range to [0..1] form [-1..1]
-		//means that adding octaves increases the height of mountains instead of just insreasing the roughness (average added height is positive instead of 0).
+		//adding octaves increases the height of mountains instead of just increasing the roughness (average added height is positive instead of 0).
 		noise = (noise + 1) / 2.0f;
 		
 		//reduce amptitude of higher frequencies
 		noise *= (float)pow(amtitudeMultiplier, i);
-
+		
 		//scale by current height (to smooth valleys)
 		float scaledNoise = noise * weight;
 		

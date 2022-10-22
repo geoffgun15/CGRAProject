@@ -60,16 +60,10 @@ void main() {
 	blendAmount2 = clamp(blendAmount2, 0, 1);
 	blendedTex = mix(blendedTex, textureColor2, blendAmount2);
 
-
-	//render water on terrain
-	blendedTex = mix(blendedTex, vec3(0,0,1), f_in.waterVolume*0.3);
-
 	// calculate lighting (hack)
 	vec3 eye = normalize(-f_in.position);
 	float light = abs(dot(normalize(f_in.normal), eye));
 	vec3 color = mix(blendedTex / 4, blendedTex, light);
-
-
 
 	// output to the frambuffer
 	fb_color = vec4(color, 1);
