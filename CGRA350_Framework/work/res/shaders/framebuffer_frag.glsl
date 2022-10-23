@@ -2,7 +2,7 @@
 out vec4 FragColor;
 
 #define PI 3.1415926538
-#define PI2 6.2831853071
+#define PIX2 6.2831853071
 
 in vec2 TexCoords;
 
@@ -32,13 +32,13 @@ float logisticize(float depth)
 vec3 cosWave( vec3 p )
 {
     float axis = p.x;//Axis determines what axis the waves are on. Operating on depth so can never be z.
-    float z =  amplitude * cos( (PI2/period) * (p.x + waveOffset));//
+    float z =  amplitude * cos( (PIX2/period) * (p.x + waveOffset));//
     return vec3(p.x, p.y, p.z + z);//
 }
 
 vec2 cosWave( vec2 p ){
     float axis = p.x;
-    float y =  0.015 * cos( (PI2/1) * (p.x + textureSpeed));//
+    float y =  0.015 * cos( (PIX2/1) * (p.x + textureSpeed));//
     return vec2(p.x, p.y + y);//
 }
 

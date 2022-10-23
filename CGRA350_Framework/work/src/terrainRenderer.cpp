@@ -262,9 +262,7 @@ float terrainRenderer::perlinNoise(float x, float y) {
 	return result;
 }
 
-//Gets the constant vector at a corner given its hash from the permutations table which can then be used to get the
-//dot product with the vector towards the point in the square. Does this by returning a different vector based on the
-//first 4 bits of the hash of the conter.
+//Get Corner Vectors
 vec2 terrainRenderer::getCornerVector(int corner) {
 	int hash = corner % 4;
 	switch (hash) {
@@ -321,28 +319,20 @@ void terrainRenderer::generateTerrain(int numOctaves) {
 
 			plane_mb.vertices[i].pos.y = heightMap[y][x];
 
-			//calc normal
-			float normX = heightMap[y][x-1]/scale - heightMap[y][x + 1] / scale; //difference in height of previous vertex and next vertex along the x axis
-			float normZ = heightMap[y-1][x] / scale - heightMap[y+1][x] / scale; //difference in height of previous vertex and next vertex along the z axis	
+			//calculate normal
+			float normX = heightMap[y][x-1]/scale - heightMap[y][x + 1] / scale;
+			float normZ = heightMap[y-1][x] / scale - heightMap[y+1][x] / scale;
 			plane_mb.vertices[i].norm = normalize(vec3(normX, 2, normZ));
 		}
 	}
 	
-
-	//generate texture transition offsets
-	for (int y = 0; y < mapSize; y++) {
-		for (int x = 0; x < mapSize; x++) {
-			int i = y*mapSize + x;
-			plane_mb.vertices[i].offset = homogeneousfbm(x * 1, y * 1, 5);
-		}
-	}
-
 	m_model.mesh = plane_mb.build();
 
 }
 
 mesh_builder terrainRenderer::generatePlane() {
 
+	//Pass this to Anne
 	std::vector<vec3> vertices;
 	std::vector<vec2> positions;
 	std::vector<int> indices;
@@ -390,7 +380,7 @@ mesh_builder terrainRenderer::generatePlane() {
 float terrainRenderer::fullrandom(float x, float y, int numOctaves) {
 	float CurrentHeight = 0;
 
-	//add multiple octaves (frequencies that are double the last frequancy and half the amptitude) together to make rough terrain.
+	//Add octaves
 	for (int i = 0; i < numOctaves; i++) {
 		float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 		CurrentHeight += r;
@@ -404,11 +394,11 @@ float terrainRenderer::fullrandom(float x, float y, int numOctaves) {
 float terrainRenderer::homogeneousfbm(float x, float y, int numOctaves) {
 	float CurrentHeight = 0;
 
-	//add multiple octaves (frequencies that are double the last frequancy and half the amptitude) together to make rough terrain.
+	//Add octaves
 	for (int i = 0; i < numOctaves; i++) {
 		float noise = perlinNoise(x * baseFrequency * pow(frequencyMultiplier, i), y * baseFrequency * pow(frequencyMultiplier, i)) * (float)pow(amtitudeMultiplier, i);
 
-		//add noise to current height function value
+		//Add Noise
 		CurrentHeight += noise;
 
 	}
@@ -420,13 +410,13 @@ float terrainRenderer::heterogeneousfbm(float x, float y, int numOctaves) { //FB
 	float CurrentHeight = 0;
 	float weight = 1.0f;
 
-	//add multiple octaves (frequencies that are double the last frequancy and half the amptitude) together to make rough terrain.
-	//weight the amptitude of each frequqncy by the current height of the function to smooth out valleys.
+	//Add octaves
+	//Weighting
 	for (int i = 0; i < numOctaves; i++) {
 		float noise = perlinNoise(x*baseFrequency*pow(frequencyMultiplier,i), y*baseFrequency*pow(frequencyMultiplier,i));
 
 		//move range to [0..1] form [-1..1]
-		//adding octaves increases the height of mountains instead of just increasing the roughness (average added height is positive instead of 0).
+		//Adding octave increase height
 		noise = (noise + 1) / 2.0f;
 		
 		//reduce amptitude of higher frequencies
@@ -435,10 +425,10 @@ float terrainRenderer::heterogeneousfbm(float x, float y, int numOctaves) { //FB
 		//scale by current height (to smooth valleys)
 		float scaledNoise = noise * weight;
 		
-		//add noise to current height function value
+		//Add Noise
 		CurrentHeight += scaledNoise;
 
-		//get the new weight for the next octave
+		//Get New Weight
 		weight = fmin(1.0f, CurrentHeight);
 	}
 
@@ -450,18 +440,18 @@ float terrainRenderer::hybridMultifractal(float x, float y, int numOctaves) {
 	float weight = 1.0f;
 	float previousNoiseVal = 1.0f;
 
-	//add multiple octaves (frequencies that are double the last frequancy and half the amptitude) together to make rough terrain.
-	//weight the amptitude of each frequqncy by the current height of the function to smooth out valleys.
+	//Add octaves
+	//Weighting
 	for (int i = 0; i < numOctaves; i++) {
 		float noise = (perlinNoise(x * baseFrequency * pow(frequencyMultiplier, i), y * baseFrequency * pow(frequencyMultiplier, i)) + offset) * pow(pow(amtitudeMultiplier, i), H);
 
 		//scale by previous frequency
 		float scaledNoise = noise * weight;
 
-		//add noise to current height function value
+		//Add Noise
 		CurrentHeight += scaledNoise;
 
-		//get the new weight for the next octave
+		//Get New Weight
 		weight = fmin(1.0f, scaledNoise);
 	}
 
